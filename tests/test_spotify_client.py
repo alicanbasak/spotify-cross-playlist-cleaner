@@ -52,5 +52,24 @@ class TestSpotifyClient(unittest.TestCase):
         self.assertEqual(spotify_instance.current_user.call_count, 2)
         spotify_instance.current_user_playlists.assert_called_once()
 
+    @patch('spotipy.oauth2.SpotifyOAuth')
+    @patch('spotipy.Spotify')
+    def test_remove_tracks_from_playlist(self, mock_spotify, mock_spotify_oauth):
+        spotify_instance = MagicMock()
+        mock_spotify.return_value = spotify_instance
+
+        oauth_instance = MagicMock()
+        oauth_instance.get_cached_token.return_value = {'access_token': 'token'}
+        mock_spotify_oauth.return_value = oauth_instance
+
+        config = SpotifyConfig()
+        client = SpotifyClient(config)
+
+        client.remove_tracks_from_playlist('playlist', ['uri1', 'uri2'])
+
+        spotify_instance.playlist_remove_all_occurrences_of_items.assert_called_once_with(
+            'playlist', ['uri1', 'uri2']
+        )
+
 if __name__ == '__main__':
     unittest.main() 

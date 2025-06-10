@@ -16,4 +16,6 @@ class PlaylistCleaner:
                 
                 if playlist_id != keep_playlist_id:
                     print(f"Removing track from playlist: {playlist_name}")
-                    self.spotify_client.remove_tracks_from_playlist(playlist_id, [{'uri': f'spotify:track:{track_id}'}])
+                    self.spotify_client.remove_tracks_from_playlist(
+                        playlist_id, [f'spotify:track:{track_id}']
+                    )
