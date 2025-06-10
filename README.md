@@ -54,6 +54,18 @@ A Python application to manage your Spotify playlists and remove duplicate track
    - Let you choose which playlist to keep duplicates in
    - Remove duplicates from other playlists
 
+## Running Tests
+
+The project includes a small suite of unit tests under the `tests/` directory. These tests verify the logic for interacting with the Spotify API and for removing duplicate tracks.
+
+Run them with Python's built-in `unittest` module:
+
+```bash
+python -m unittest
+```
+
+All required packages are already listed in `requirements.txt`; no extra dependencies such as `pytest` are needed.
+
 ## Contributing
 
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
