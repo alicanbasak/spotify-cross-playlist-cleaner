@@ -5,7 +5,9 @@ class DuplicateFinder:
     def __init__(self, spotify_client: SpotifyClient):
         self.spotify_client = spotify_client
 
-    def find_cross_playlist_duplicates(self, playlists: List[Tuple[str, str]]) -> Dict[str, List[Dict]]:
+    def find_cross_playlist_duplicates(
+        self, playlists: List[Tuple[str, str]]
+    ) -> Dict[str, List[Dict[str, str]]]:
         """Find duplicate tracks across multiple playlists"""
         track_locations = {}
         
@@ -23,8 +25,9 @@ class DuplicateFinder:
                 
                 track_locations[track_id].append({
                     'playlist_name': playlist_name,
+                    'playlist_id': playlist_id,
                     'track_name': track_name,
-                    'artists': artists
+                    'artists': artists,
                 })
         
         # Filter out tracks that are not duplicates

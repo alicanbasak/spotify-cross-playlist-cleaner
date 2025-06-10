@@ -1,14 +1,15 @@
-from config import SpotifyConfig  # Import necessary modules
+from config import SpotifyConfig
 from spotify_client import SpotifyClient
 from duplicate_finder import DuplicateFinder
 from playlist_cleaner import PlaylistCleaner
+import argparse
 
-def main():
+def interactive_flow(
+    spotify_client: SpotifyClient,
+    duplicate_finder: DuplicateFinder,
+    playlist_cleaner: PlaylistCleaner,
+) -> None:
     try:
-        config = SpotifyConfig()
-        spotify_client = SpotifyClient(config)
-        duplicate_finder = DuplicateFinder(spotify_client)
-        playlist_cleaner = PlaylistCleaner(spotify_client)
         
         # Retrieve playlists
         print("\nRetrieving playlists...")
@@ -61,6 +62,58 @@ def main():
             
     except Exception as e:
         print(f"\nAn error occurred: {str(e)}")
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        description="Spotify Cross Playlist Cleaner CLI"
+    )
+    sub = parser.add_subparsers(dest="command")
+
+    sub.add_parser("list-playlists", help="List all playlists")
+    sub.add_parser(
+        "find-duplicates", help="Find duplicate tracks across your playlists"
+    )
+    clean_parser = sub.add_parser(
+        "remove-duplicates",
+        help="Remove duplicates keeping tracks in the specified playlist",
+    )
+    clean_parser.add_argument(
+        "--keep",
+        required=True,
+        help="Playlist ID to keep duplicate tracks in",
+    )
+
+    args = parser.parse_args()
+
+    config = SpotifyConfig()
+    spotify_client = SpotifyClient(config)
+    duplicate_finder = DuplicateFinder(spotify_client)
+    playlist_cleaner = PlaylistCleaner(spotify_client)
+
+    if args.command == "list-playlists":
+        playlists = spotify_client.get_user_playlists()
+        for name, pid in playlists:
+            print(f"{name}\t{pid}")
+    elif args.command == "find-duplicates":
+        playlists = spotify_client.get_user_playlists()
+        duplicates = duplicate_finder.find_cross_playlist_duplicates(playlists)
+        if not duplicates:
+            print("No duplicates found")
+            return
+        for track_id, locations in duplicates.items():
+            first = locations[0]
+            print(f"{first['track_name']} - {first['artists']}")
+            for loc in locations:
+                print(f"  {loc['playlist_name']} ({loc['playlist_id']})")
+    elif args.command == "remove-duplicates":
+        playlists = spotify_client.get_user_playlists()
+        duplicates = duplicate_finder.find_cross_playlist_duplicates(playlists)
+        playlist_cleaner.remove_duplicates(duplicates, args.keep)
+        print("Duplicates removed")
+    else:
+        interactive_flow(spotify_client, duplicate_finder, playlist_cleaner)
+
 
 if __name__ == "__main__":
     main()

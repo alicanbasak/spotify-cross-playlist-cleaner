@@ -5,7 +5,9 @@ class PlaylistCleaner:
     def __init__(self, spotify_client: SpotifyClient):
         self.spotify_client = spotify_client
 
-    def remove_duplicates(self, duplicates: Dict[str, List[Dict]], keep_playlist_id: str):
+    def remove_duplicates(
+        self, duplicates: Dict[str, List[Dict[str, str]]], keep_playlist_id: str
+    ) -> None:
         """Remove duplicate tracks from playlists except the one to keep"""
         for track_id, locations in duplicates.items():
             for location in locations:
