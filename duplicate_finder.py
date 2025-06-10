@@ -16,9 +16,16 @@ class DuplicateFinder:
             tracks = self.spotify_client.get_playlist_tracks(playlist_id)
             
             for track in tracks:
-                track_id = track['track']['id']
-                track_name = track['track']['name']
-                artists = ', '.join(artist['name'] for artist in track['track']['artists'])
+                track_info = track.get('track')
+                if not track_info or not track_info.get('id'):
+                    # Skip entries without track details or an ID
+                    continue
+
+                track_id = track_info['id']
+                track_name = track_info.get('name', '')
+                artists = ', '.join(
+                    artist.get('name', '') for artist in track_info.get('artists', [])
+                )
                 
                 if track_id not in track_locations:
                     track_locations[track_id] = []
