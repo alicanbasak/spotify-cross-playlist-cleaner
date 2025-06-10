@@ -74,6 +74,21 @@ Endpoints:
 
 See [docs/api.md](docs/api.md) for full details.
 
+## Testing
+
+Install the test dependencies using `pip`:
+
+```bash
+
+pip install -r requirements.txt
+```
+
+Run the test suite with:
+
+```bash
+pytest
+```
+
 
 ## Contributing
 
