@@ -33,5 +33,18 @@ class TestDuplicateFinder(unittest.TestCase):
 
         self.assertEqual(duplicates, {})
 
+    def test_get_duplicate_stats(self):
+        duplicates = {
+            't1': [
+                {'playlist_name': 'A', 'playlist_id': '1'},
+                {'playlist_name': 'B', 'playlist_id': '2'},
+            ],
+            't2': [
+                {'playlist_name': 'A', 'playlist_id': '1'},
+            ]
+        }
+        stats = DuplicateFinder.get_duplicate_stats(duplicates)
+        self.assertEqual(stats, {'1': 2, '2': 1})
+
 if __name__ == '__main__':
     unittest.main() 

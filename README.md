@@ -9,6 +9,9 @@ A Python application to manage your Spotify playlists and remove duplicate track
 - Allows you to keep duplicates in one playlist and remove them from others
 - Handles pagination for large playlists
 - Secure authentication using environment variables
+- Scheduled cleanup to automatically remove duplicates daily or weekly
+- Advanced filtering by artist, album or release year
+- Statistics reporting of how many duplicates exist per playlist
 
 ## Prerequisites
 
@@ -58,6 +61,15 @@ A Python application to manage your Spotify playlists and remove duplicate track
    - Let you choose which playlist to keep duplicates in
    - Remove duplicates from other playlists
 
+You can also filter duplicates by artist, album or year using command line options,
+and schedule periodic cleanup:
+
+```bash
+python main.py find-duplicates --artists "Artist Name"
+python main.py remove-duplicates --keep PLAYLIST_ID --years 2023
+python main.py schedule-cleanup --keep PLAYLIST_ID --frequency weekly
+```
+
 ## Web Service
 
 Run the FastAPI application with **uvicorn**:
@@ -71,6 +83,8 @@ Endpoints:
 - `GET /playlists` – list playlists
 - `GET /duplicates` – find duplicate tracks
 - `POST /cleanup` – remove duplicates while keeping a specified playlist
+- `GET /stats` – statistics about duplicate counts per playlist
+- `POST /schedule` – start scheduled cleanup
 
 See [docs/api.md](docs/api.md) for full details.
 

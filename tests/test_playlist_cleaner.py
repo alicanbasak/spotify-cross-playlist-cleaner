@@ -16,11 +16,12 @@ class TestPlaylistCleaner(unittest.TestCase):
             ]
         }
         
-        self.playlist_cleaner.remove_duplicates(duplicates, '1')
-        
+        stats = self.playlist_cleaner.remove_duplicates(duplicates, '1')
+
         self.mock_spotify_client.remove_tracks_from_playlist.assert_called_once_with(
             '2', ['spotify:track:track1']
         )
+        self.assertEqual(stats, {'2': 1})
 
 if __name__ == '__main__':
     unittest.main() 
