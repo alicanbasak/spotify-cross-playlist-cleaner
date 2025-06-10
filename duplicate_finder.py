@@ -1,4 +1,4 @@
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Optional
 from spotify_client import SpotifyClient
 
 class DuplicateFinder:
@@ -6,12 +6,23 @@ class DuplicateFinder:
         self.spotify_client = spotify_client
 
     def find_cross_playlist_duplicates(
-        self, playlists: List[Tuple[str, str]]
+        self,
+        playlists: List[Tuple[str, str]],
+        exclude: Optional[List[str]] = None,
     ) -> Dict[str, List[Dict[str, str]]]:
-        """Find duplicate tracks across multiple playlists"""
-        track_locations = {}
-        
+        """Find duplicate tracks across multiple playlists
+
+        Args:
+            playlists: List of ``(name, id)`` tuples.
+            exclude: Playlist IDs to skip while searching.
+        """
+        track_locations: Dict[str, List[Dict[str, str]]] = {}
+
+        exclude_set = set(exclude or [])
+
         for playlist_name, playlist_id in playlists:
+            if playlist_id in exclude_set:
+                continue
             print(f"Checking playlist: {playlist_name}")
             tracks = self.spotify_client.get_playlist_tracks(playlist_id)
             

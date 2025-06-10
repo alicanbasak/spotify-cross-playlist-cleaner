@@ -2,12 +2,14 @@ from config import SpotifyConfig
 from spotify_client import SpotifyClient
 from duplicate_finder import DuplicateFinder
 from playlist_cleaner import PlaylistCleaner
+from typing import List, Optional
 import argparse
 
 def interactive_flow(
     spotify_client: SpotifyClient,
     duplicate_finder: DuplicateFinder,
     playlist_cleaner: PlaylistCleaner,
+    exclude: Optional[List[str]] = None,
 ) -> None:
     try:
         
@@ -27,7 +29,9 @@ def interactive_flow(
         
         # Perform duplicate analysis
         print("\nSearching for duplicate tracks...")
-        duplicates = duplicate_finder.find_cross_playlist_duplicates(playlists)
+        duplicates = duplicate_finder.find_cross_playlist_duplicates(
+            playlists, exclude
+        )
         
         if duplicates:
             print(f"\n{len(duplicates)} tracks found in multiple playlists:")
@@ -51,7 +55,9 @@ def interactive_flow(
                 
                 if confirm.lower() == 'y':
                     print("\nRemoving duplicate tracks...")
-                    playlist_cleaner.remove_duplicates(duplicates, keep_playlist_id)
+                    playlist_cleaner.remove_duplicates(
+                        duplicates, keep_playlist_id, exclude
+                    )
                     print("\nOperation completed!")
                 else:
                     print("\nOperation cancelled.")
@@ -67,6 +73,12 @@ def interactive_flow(
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Spotify Cross Playlist Cleaner CLI"
+    )
+    parser.add_argument(
+        "--exclude",
+        nargs="*",
+        default=[],
+        help="Playlist IDs to exclude from processing",
     )
     sub = parser.add_subparsers(dest="command")
 
@@ -97,7 +109,9 @@ def main() -> None:
             print(f"{name}\t{pid}")
     elif args.command == "find-duplicates":
         playlists = spotify_client.get_user_playlists()
-        duplicates = duplicate_finder.find_cross_playlist_duplicates(playlists)
+        duplicates = duplicate_finder.find_cross_playlist_duplicates(
+            playlists, args.exclude
+        )
         if not duplicates:
             print("No duplicates found")
             return
@@ -108,11 +122,18 @@ def main() -> None:
                 print(f"  {loc['playlist_name']} ({loc['playlist_id']})")
     elif args.command == "remove-duplicates":
         playlists = spotify_client.get_user_playlists()
-        duplicates = duplicate_finder.find_cross_playlist_duplicates(playlists)
-        playlist_cleaner.remove_duplicates(duplicates, args.keep)
+        duplicates = duplicate_finder.find_cross_playlist_duplicates(
+            playlists, args.exclude
+        )
+        playlist_cleaner.remove_duplicates(duplicates, args.keep, args.exclude)
         print("Duplicates removed")
     else:
-        interactive_flow(spotify_client, duplicate_finder, playlist_cleaner)
+        interactive_flow(
+            spotify_client,
+            duplicate_finder,
+            playlist_cleaner,
+            args.exclude,
+        )
 
 
 if __name__ == "__main__":

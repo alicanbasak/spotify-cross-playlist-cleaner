@@ -46,6 +46,12 @@ A Python application to manage your Spotify playlists and remove duplicate track
    python main.py
    ```
 
+   To exclude specific playlists from duplicate search and removal, use:
+
+   ```bash
+   python main.py remove-duplicates --keep <playlist_id> --exclude <id1> <id2>
+   ```
+
 2. Follow the authentication process in your browser
 
 3. The app will:

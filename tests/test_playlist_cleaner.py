@@ -17,10 +17,22 @@ class TestPlaylistCleaner(unittest.TestCase):
         }
         
         self.playlist_cleaner.remove_duplicates(duplicates, '1')
-        
+
         self.mock_spotify_client.remove_tracks_from_playlist.assert_called_once_with(
             '2', [{'uri': 'spotify:track:track1'}]
         )
+
+    def test_remove_duplicates_with_exclude(self):
+        duplicates = {
+            'track1': [
+                {'playlist_name': 'Playlist 1', 'playlist_id': '1'},
+                {'playlist_name': 'Playlist 2', 'playlist_id': '2'}
+            ]
+        }
+
+        self.playlist_cleaner.remove_duplicates(duplicates, '1', exclude=['2'])
+
+        self.mock_spotify_client.remove_tracks_from_playlist.assert_not_called()
 
 if __name__ == '__main__':
     unittest.main() 

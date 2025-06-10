@@ -17,9 +17,20 @@ class TestDuplicateFinder(unittest.TestCase):
         ]
         
         duplicates = self.duplicate_finder.find_cross_playlist_duplicates(playlists)
-        
+
         self.assertIn('track1', duplicates)
         self.assertEqual(len(duplicates['track1']), 2)
+
+    def test_find_cross_playlist_duplicates_with_exclude(self):
+        playlists = [('Playlist 1', '1'), ('Playlist 2', '2')]
+        self.mock_spotify_client.get_playlist_tracks.side_effect = [
+            [{'track': {'id': 'track1', 'name': 'Song 1', 'artists': [{'name': 'Artist 1'}]}}],
+            [{'track': {'id': 'track1', 'name': 'Song 1', 'artists': [{'name': 'Artist 1'}]}}],
+        ]
+
+        duplicates = self.duplicate_finder.find_cross_playlist_duplicates(playlists, exclude=['1'])
+
+        self.assertNotIn('track1', duplicates)
 
 if __name__ == '__main__':
     unittest.main() 
