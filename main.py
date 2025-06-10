@@ -41,7 +41,11 @@ def interactive_flow(
                     print(f"- {loc['playlist_name']}")
             
             # Ask user which playlist to keep duplicates in
-            keep_idx = int(input("\nWhich playlist would you like to keep the tracks in? (Enter number): ")) - 1
+            try:
+                keep_idx = int(input("\nWhich playlist would you like to keep the tracks in? (Enter number): ")) - 1
+            except ValueError:
+                print("\nPlease enter a valid number.")
+                return
             
             if 0 <= keep_idx < len(playlists):
                 keep_playlist_name, keep_playlist_id = playlists[keep_idx]
