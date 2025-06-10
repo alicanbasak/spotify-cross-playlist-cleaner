@@ -4,11 +4,17 @@ from spotify_client import SpotifyClient
 from config import SpotifyConfig
 
 class TestSpotifyClient(unittest.TestCase):
+    @patch('spotipy.oauth2.SpotifyOAuth')
     @patch('spotipy.Spotify')
-    def test_get_user_playlists(self, mock_spotify):
+    def test_get_user_playlists(self, mock_spotify, mock_spotify_oauth):
         # Create a mock Spotify instance
         spotify_instance = MagicMock()
         mock_spotify.return_value = spotify_instance
+
+        # Create a mock SpotifyOAuth instance with required methods
+        oauth_instance = MagicMock()
+        oauth_instance.get_cached_token.return_value = {'access_token': 'token'}
+        mock_spotify_oauth.return_value = oauth_instance
 
         # Mock the current_user method
         spotify_instance.current_user.return_value = {'id': 'test_user_id'}
