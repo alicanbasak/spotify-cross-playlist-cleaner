@@ -6,14 +6,34 @@ class PlaylistCleaner:
         self.spotify_client = spotify_client
 
     def remove_duplicates(
-        self, duplicates: Dict[str, List[Dict[str, str]]], keep_playlist_id: str
+        self,
+        duplicates: Dict[str, List[Dict[str, str]]],
+        keep_playlist_id: str,
+        dry_run: bool = False,
     ) -> None:
-        """Remove duplicate tracks from playlists except the one to keep"""
+        """Remove duplicate tracks from playlists except the one to keep
+
+        Parameters
+        ----------
+        duplicates : Dict[str, List[Dict[str, str]]]
+            Mapping of track IDs to their playlist locations.
+        keep_playlist_id : str
+            Playlist ID in which duplicates should be kept.
+        dry_run : bool, optional
+            When ``True`` only print the actions without removing tracks.
+        """
         for track_id, locations in duplicates.items():
             for location in locations:
                 playlist_name = location['playlist_name']
                 playlist_id = location['playlist_id']
-                
+
                 if playlist_id != keep_playlist_id:
-                    print(f"Removing track from playlist: {playlist_name}")
-                    self.spotify_client.remove_tracks_from_playlist(playlist_id, [{'uri': f'spotify:track:{track_id}'}])
+                    message = f"Removing track from playlist: {playlist_name}"
+                    if dry_run:
+                        print(f"[Dry run] {message}")
+                        continue
+                    print(message)
+                    self.spotify_client.remove_tracks_from_playlist(
+                        playlist_id,
+                        [{'uri': f'spotify:track:{track_id}'}],
+                    )

@@ -83,6 +83,11 @@ def main() -> None:
         required=True,
         help="Playlist ID to keep duplicate tracks in",
     )
+    clean_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Only show which tracks would be removed",
+    )
 
     args = parser.parse_args()
 
@@ -109,7 +114,11 @@ def main() -> None:
     elif args.command == "remove-duplicates":
         playlists = spotify_client.get_user_playlists()
         duplicates = duplicate_finder.find_cross_playlist_duplicates(playlists)
-        playlist_cleaner.remove_duplicates(duplicates, args.keep)
+        playlist_cleaner.remove_duplicates(
+            duplicates,
+            args.keep,
+            dry_run=args.dry_run,
+        )
         print("Duplicates removed")
     else:
         interactive_flow(spotify_client, duplicate_finder, playlist_cleaner)

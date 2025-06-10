@@ -54,6 +54,13 @@ A Python application to manage your Spotify playlists and remove duplicate track
    - Let you choose which playlist to keep duplicates in
    - Remove duplicates from other playlists
 
+You can also run the `remove-duplicates` command directly. Add the `--dry-run`
+flag to preview the changes without modifying your playlists:
+
+```bash
+python main.py remove-duplicates --keep YOUR_PLAYLIST_ID --dry-run
+```
+
 ## Contributing
 
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
