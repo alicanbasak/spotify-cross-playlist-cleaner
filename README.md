@@ -40,6 +40,8 @@ A Python application to manage your Spotify playlists and remove duplicate track
 
 ## Usage
 
+### Command Line
+
 1. Run the application:
 
    ```bash
@@ -53,6 +55,17 @@ A Python application to manage your Spotify playlists and remove duplicate track
    - Find duplicate tracks
    - Let you choose which playlist to keep duplicates in
    - Remove duplicates from other playlists
+
+### Web Service
+
+You can also run the project as a web service suitable for mobile applications:
+
+```bash
+uvicorn web_service:app --reload
+```
+
+The service exposes a simple REST API. Refer to `docs/api.md` for details on the
+available endpoints.
 
 ## Contributing
 
