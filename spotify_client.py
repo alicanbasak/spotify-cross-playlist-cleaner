@@ -104,8 +104,8 @@ class SpotifyClient:
         
         return tracks
 
-    def remove_tracks_from_playlist(self, playlist_id: str, tracks_to_remove: List[Dict]):
+    def remove_tracks_from_playlist(self, playlist_id: str, tracks_to_remove: List[str]):
         """Remove tracks from a playlist"""
         for i in range(0, len(tracks_to_remove), 100):
             batch = tracks_to_remove[i:i + 100]
-            self.sp.playlist_remove_specific_occurrences_of_items(playlist_id, batch)
+            self.sp.playlist_remove_all_occurrences_of_items(playlist_id, batch)
