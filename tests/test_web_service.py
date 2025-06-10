@@ -67,7 +67,7 @@ class TestWebService(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), duplicates)
-        self.ws.duplicate_finder.find_cross_playlist_duplicates.assert_called_once_with(playlists)
+        self.ws.duplicate_finder.find_cross_playlist_duplicates.assert_called_once_with(playlists, artists=None, albums=None, years=None)
 
     def test_cleanup_valid(self):
         playlists = [('Playlist 1', '1'), ('Playlist 2', '2')]
@@ -89,13 +89,14 @@ class TestWebService(unittest.TestCase):
         }
         self.ws.spotify_client.get_user_playlists.return_value = playlists
         self.ws.duplicate_finder.find_cross_playlist_duplicates.return_value = duplicates
-        self.ws.playlist_cleaner.remove_duplicates = MagicMock()
+        self.ws.playlist_cleaner.remove_duplicates = MagicMock(return_value={'2': 1})
 
         response = self.client.post('/cleanup', json={'keep_playlist_id': '1'})
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), {'status': 'duplicates removed'})
+        self.assertEqual(response.json(), {'status': 'duplicates removed', 'stats': {'2': 1}})
         self.ws.playlist_cleaner.remove_duplicates.assert_called_once_with(duplicates, '1')
+        self.ws.duplicate_finder.find_cross_playlist_duplicates.assert_called_once_with(playlists, artists=None, albums=None, years=None)
 
     def test_cleanup_invalid_playlist(self):
         self.ws.spotify_client.get_user_playlists.return_value = [('Playlist 1', '1')]

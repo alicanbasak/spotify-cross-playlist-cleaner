@@ -75,9 +75,12 @@ def main() -> None:
     sub = parser.add_subparsers(dest="command")
 
     sub.add_parser("list-playlists", help="List all playlists")
-    sub.add_parser(
+    find_parser = sub.add_parser(
         "find-duplicates", help="Find duplicate tracks across your playlists"
     )
+    find_parser.add_argument("--artists", nargs="*", help="Filter by artist names")
+    find_parser.add_argument("--albums", nargs="*", help="Filter by album names")
+    find_parser.add_argument("--years", nargs="*", type=int, help="Filter by release years")
     clean_parser = sub.add_parser(
         "remove-duplicates",
         help="Remove duplicates keeping tracks in the specified playlist",
@@ -86,6 +89,19 @@ def main() -> None:
         "--keep",
         required=True,
         help="Playlist ID to keep duplicate tracks in",
+    )
+    clean_parser.add_argument("--artists", nargs="*", help="Filter by artist names")
+    clean_parser.add_argument("--albums", nargs="*", help="Filter by album names")
+    clean_parser.add_argument("--years", nargs="*", type=int, help="Filter by release years")
+
+    schedule_parser = sub.add_parser(
+        "schedule-cleanup",
+        help="Schedule periodic cleanup",
+    )
+    schedule_parser.add_argument("--keep", required=True, help="Playlist ID to keep")
+    schedule_parser.add_argument(
+        "--frequency", choices=["daily", "weekly"], default="daily",
+        help="Cleanup frequency"
     )
 
     args = parser.parse_args()
@@ -101,7 +117,12 @@ def main() -> None:
             print(f"{name}\t{pid}")
     elif args.command == "find-duplicates":
         playlists = spotify_client.get_user_playlists()
-        duplicates = duplicate_finder.find_cross_playlist_duplicates(playlists)
+        duplicates = duplicate_finder.find_cross_playlist_duplicates(
+            playlists,
+            artists=args.artists,
+            albums=args.albums,
+            years=args.years,
+        )
         if not duplicates:
             print("No duplicates found")
             return
@@ -112,9 +133,20 @@ def main() -> None:
                 print(f"  {loc['playlist_name']} ({loc['playlist_id']})")
     elif args.command == "remove-duplicates":
         playlists = spotify_client.get_user_playlists()
-        duplicates = duplicate_finder.find_cross_playlist_duplicates(playlists)
-        playlist_cleaner.remove_duplicates(duplicates, args.keep)
+        duplicates = duplicate_finder.find_cross_playlist_duplicates(
+            playlists,
+            artists=args.artists,
+            albums=args.albums,
+            years=args.years,
+        )
+        stats = playlist_cleaner.remove_duplicates(duplicates, args.keep)
         print("Duplicates removed")
+        if stats:
+            total = sum(stats.values())
+            print(f"Total removed: {total}")
+    elif args.command == "schedule-cleanup":
+        from scheduler import start_scheduler
+        start_scheduler(args.keep, args.frequency)
     else:
         interactive_flow(spotify_client, duplicate_finder, playlist_cleaner)
 

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel
 
 from config import SpotifyConfig
@@ -15,6 +15,13 @@ playlist_cleaner = PlaylistCleaner(spotify_client)
 
 class CleanupRequest(BaseModel):
     keep_playlist_id: str
+    artists: list[str] | None = None
+    albums: list[str] | None = None
+    years: list[int] | None = None
+
+class ScheduleRequest(BaseModel):
+    keep_playlist_id: str
+    frequency: str = "daily"
 
 @app.get("/playlists")
 async def list_playlists():
@@ -22,10 +29,29 @@ async def list_playlists():
     return [{"name": name, "id": pid} for name, pid in playlists]
 
 @app.get("/duplicates")
-async def list_duplicates():
+async def list_duplicates(
+    artists: list[str] | None = Query(None),
+    albums: list[str] | None = Query(None),
+    years: list[int] | None = Query(None),
+):
     playlists = spotify_client.get_user_playlists()
-    duplicates = duplicate_finder.find_cross_playlist_duplicates(playlists)
+    duplicates = duplicate_finder.find_cross_playlist_duplicates(
+        playlists, artists=artists, albums=albums, years=years
+    )
     return duplicates
+
+@app.get("/stats")
+async def get_stats(
+    artists: list[str] | None = Query(None),
+    albums: list[str] | None = Query(None),
+    years: list[int] | None = Query(None),
+):
+    playlists = spotify_client.get_user_playlists()
+    duplicates = duplicate_finder.find_cross_playlist_duplicates(
+        playlists, artists=artists, albums=albums, years=years
+    )
+    stats = DuplicateFinder.get_duplicate_stats(duplicates)
+    return stats
 
 @app.post("/cleanup")
 async def cleanup_duplicates(req: CleanupRequest):
@@ -33,6 +59,17 @@ async def cleanup_duplicates(req: CleanupRequest):
     playlist_ids = [pid for _, pid in playlists]
     if req.keep_playlist_id not in playlist_ids:
         raise HTTPException(status_code=400, detail="Playlist not found")
-    duplicates = duplicate_finder.find_cross_playlist_duplicates(playlists)
-    playlist_cleaner.remove_duplicates(duplicates, req.keep_playlist_id)
-    return {"status": "duplicates removed"}
+    duplicates = duplicate_finder.find_cross_playlist_duplicates(
+        playlists,
+        artists=req.artists,
+        albums=req.albums,
+        years=req.years,
+    )
+    stats = playlist_cleaner.remove_duplicates(duplicates, req.keep_playlist_id)
+    return {"status": "duplicates removed", "stats": stats}
+
+@app.post("/schedule")
+async def schedule_cleanup(req: ScheduleRequest):
+    from scheduler import start_scheduler
+    start_scheduler(req.keep_playlist_id, req.frequency)
+    return {"status": "scheduled"}
