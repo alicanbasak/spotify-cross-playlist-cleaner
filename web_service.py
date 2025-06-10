@@ -17,18 +17,18 @@ class CleanupRequest(BaseModel):
     keep_playlist_id: str
 
 @app.get("/playlists")
-def list_playlists():
+async def list_playlists():
     playlists = spotify_client.get_user_playlists()
     return [{"name": name, "id": pid} for name, pid in playlists]
 
 @app.get("/duplicates")
-def list_duplicates():
+async def list_duplicates():
     playlists = spotify_client.get_user_playlists()
     duplicates = duplicate_finder.find_cross_playlist_duplicates(playlists)
     return duplicates
 
 @app.post("/cleanup")
-def cleanup_duplicates(req: CleanupRequest):
+async def cleanup_duplicates(req: CleanupRequest):
     playlists = spotify_client.get_user_playlists()
     playlist_ids = [pid for _, pid in playlists]
     if req.keep_playlist_id not in playlist_ids:
