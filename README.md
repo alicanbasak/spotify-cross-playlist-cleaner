@@ -56,6 +56,21 @@ A Python application to manage your Spotify playlists and remove duplicate track
    - Let you choose which playlist to keep duplicates in
    - Remove duplicates from other playlists
 
+## Web Service
+
+Run the FastAPI application with **uvicorn**:
+
+```bash
+uvicorn web_service:app
+```
+
+Endpoints:
+
+- `GET /playlists` – list playlists
+- `GET /duplicates` – find duplicate tracks
+- `POST /cleanup` – remove duplicates while keeping a specified playlist
+
+See [docs/api.md](docs/api.md) for full details.
 
 
 ## Contributing
