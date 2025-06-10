@@ -31,11 +31,13 @@ A Python application to manage your Spotify playlists and remove duplicate track
    pip install -r requirements.txt
    ```
 
-3. Create a `.env` file in the project root and add your Spotify API credentials:
-   ```
-   SPOTIFY_CLIENT_ID=your_client_id
-   SPOTIFY_CLIENT_SECRET=your_client_secret
-   SPOTIFY_REDIRECT_URI=your_redirect_uri
+3. Copy `.env.example` to `.env` in the project root and fill in your Spotify API credentials:
+   ```bash
+   cp .env.example .env
+   # then edit .env and set:
+   # SPOTIFY_CLIENT_ID=your_client_id
+   # SPOTIFY_CLIENT_SECRET=your_client_secret
+   # SPOTIFY_REDIRECT_URI=your_redirect_uri
    ```
 
 ## Usage
