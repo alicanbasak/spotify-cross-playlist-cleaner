@@ -21,5 +21,17 @@ class TestDuplicateFinder(unittest.TestCase):
         self.assertIn('track1', duplicates)
         self.assertEqual(len(duplicates['track1']), 2)
 
+    def test_find_cross_playlist_duplicates_with_missing_id(self):
+        playlists = [('Playlist 1', '1')]
+        # Track missing an ID and a None track
+        self.mock_spotify_client.get_playlist_tracks.return_value = [
+            {'track': {'id': None, 'name': 'Song 1', 'artists': [{'name': 'Artist 1'}]}},
+            {'track': None}
+        ]
+
+        duplicates = self.duplicate_finder.find_cross_playlist_duplicates(playlists)
+
+        self.assertEqual(duplicates, {})
+
 if __name__ == '__main__':
     unittest.main() 
